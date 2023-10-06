@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+service ar_condicionado{
+    rpc ar_condicionado_on(    info_request) returns (ar_condicionado_info) {}
+    rpc ar_condicionado_off(   info_request) returns (ar_condicionado_info) {}
+    rpc ar_condicionado_status(info_request) returns (ar_condicionado_info) {}
+    rpc ar_condicionado_temp(  change_temp ) returns (ar_condicionado_info) {}
+    
+}
+message info_request{
+    string name = 1;
+}
+message change_temp{
+    string name = 1 ;
+    int32 new_temp = 2 ;
+}
+message ar_condicionado_info {
+    bool on = 1;
+    int32 temperature = 2 ;
+
+}
+
+
