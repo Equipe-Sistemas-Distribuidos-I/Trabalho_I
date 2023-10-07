@@ -10,7 +10,7 @@ service ar_condicionado{
 service lampada{
     rpc lampada_on( info_request) returns (lampada_info) {}
     rpc lampada_off(info_request) returns (lampada_info) {}
-    rpc ar_condicionado_status(lampada_request) returns (lampada_info) {}
+    rpc lampada_status(lampada_request) returns (lampada_info) {}
 }
 service geladeira{
     rpc ar_condicionado_on(    info_request) returns (geladeira_info) {}
@@ -28,12 +28,15 @@ service network_interface{
 message info_request{
     string name = 1;
 }
+message lampada_request{
+    string name = 1;
+}
 message change_temp{
     string name = 1 ; 
     int32 new_temp = 2 ;
 }
 
-lampada_info{
+message lampada_info{
     bool on = 1;
 }
 message ar_condicionado_info {
