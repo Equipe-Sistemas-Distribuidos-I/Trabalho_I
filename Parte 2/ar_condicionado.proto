@@ -7,17 +7,42 @@ service ar_condicionado{
     rpc ar_condicionado_temp(  change_temp ) returns (ar_condicionado_info) {}
     
 }
+service lampada{
+    rpc lampada_on( info_request) returns (lampada_info) {}
+    rpc lampada_off(info_request) returns (lampada_info) {}
+    rpc ar_condicionado_status(lampada_request) returns (lampada_info) {}
+}
+service geladeira{
+    rpc ar_condicionado_on(    info_request) returns (geladeira_info) {}
+    rpc ar_condicionado_off(   info_request) returns (geladeira_info) {}
+    rpc ar_condicionado_status(info_request) returns (geladeira_info) {}
+    rpc ar_condicionado_temp(  change_temp ) returns (geladeira_info) {}
+}
+service network_interface{
+    rpc interface_scan(    info_request) returns (geladeira_info) {}
+    rpc interface_connect(    info_request) returns (geladeira_info) {}
+    rpc interface_disconnect(   info_request) returns (geladeira_info) {}
+
+}
+
 message info_request{
     string name = 1;
 }
 message change_temp{
-    string name = 1 ;
+    string name = 1 ; 
     int32 new_temp = 2 ;
+}
+
+lampada_info{
+    bool on = 1;
 }
 message ar_condicionado_info {
     bool on = 1;
     int32 temperature = 2 ;
-
+}
+message geladeira_info {
+    bool on = 1;
+    int32 temperature = 2 ;
 }
 
 
