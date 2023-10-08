@@ -31,7 +31,12 @@ class ar_condicionadoStub(object):
                 )
         self.ar_condicionado_temp = channel.unary_unary(
                 '/ar_condicionado/ar_condicionado_temp',
-                request_serializer=devices__pb2.change_temp.SerializeToString,
+                request_serializer=devices__pb2.info_request.SerializeToString,
+                response_deserializer=devices__pb2.ar_condicionado_info.FromString,
+                )
+        self.close_connection = channel.unary_unary(
+                '/ar_condicionado/close_connection',
+                request_serializer=devices__pb2.info_request.SerializeToString,
                 response_deserializer=devices__pb2.ar_condicionado_info.FromString,
                 )
 
@@ -63,6 +68,12 @@ class ar_condicionadoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def close_connection(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ar_condicionadoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -83,7 +94,12 @@ def add_ar_condicionadoServicer_to_server(servicer, server):
             ),
             'ar_condicionado_temp': grpc.unary_unary_rpc_method_handler(
                     servicer.ar_condicionado_temp,
-                    request_deserializer=devices__pb2.change_temp.FromString,
+                    request_deserializer=devices__pb2.info_request.FromString,
+                    response_serializer=devices__pb2.ar_condicionado_info.SerializeToString,
+            ),
+            'close_connection': grpc.unary_unary_rpc_method_handler(
+                    servicer.close_connection,
+                    request_deserializer=devices__pb2.info_request.FromString,
                     response_serializer=devices__pb2.ar_condicionado_info.SerializeToString,
             ),
     }
@@ -159,7 +175,24 @@ class ar_condicionado(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ar_condicionado/ar_condicionado_temp',
-            devices__pb2.change_temp.SerializeToString,
+            devices__pb2.info_request.SerializeToString,
+            devices__pb2.ar_condicionado_info.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def close_connection(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ar_condicionado/close_connection',
+            devices__pb2.info_request.SerializeToString,
             devices__pb2.ar_condicionado_info.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -452,7 +485,7 @@ class geladeira(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
 
-class network_interfaceStub(object):
+class gateway_interfaceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -461,74 +494,42 @@ class network_interfaceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.interface_scan = channel.unary_unary(
-                '/network_interface/interface_scan',
-                request_serializer=devices__pb2.info_request.SerializeToString,
-                response_deserializer=devices__pb2.geladeira_info.FromString,
-                )
-        self.interface_connect = channel.unary_unary(
-                '/network_interface/interface_connect',
-                request_serializer=devices__pb2.info_request.SerializeToString,
-                response_deserializer=devices__pb2.geladeira_info.FromString,
-                )
-        self.interface_disconnect = channel.unary_unary(
-                '/network_interface/interface_disconnect',
+        self.use_device = channel.unary_unary(
+                '/gateway_interface/use_device',
                 request_serializer=devices__pb2.info_request.SerializeToString,
                 response_deserializer=devices__pb2.geladeira_info.FromString,
                 )
 
 
-class network_interfaceServicer(object):
+class gateway_interfaceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def interface_scan(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def interface_connect(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def interface_disconnect(self, request, context):
+    def use_device(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_network_interfaceServicer_to_server(servicer, server):
+def add_gateway_interfaceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'interface_scan': grpc.unary_unary_rpc_method_handler(
-                    servicer.interface_scan,
-                    request_deserializer=devices__pb2.info_request.FromString,
-                    response_serializer=devices__pb2.geladeira_info.SerializeToString,
-            ),
-            'interface_connect': grpc.unary_unary_rpc_method_handler(
-                    servicer.interface_connect,
-                    request_deserializer=devices__pb2.info_request.FromString,
-                    response_serializer=devices__pb2.geladeira_info.SerializeToString,
-            ),
-            'interface_disconnect': grpc.unary_unary_rpc_method_handler(
-                    servicer.interface_disconnect,
+            'use_device': grpc.unary_unary_rpc_method_handler(
+                    servicer.use_device,
                     request_deserializer=devices__pb2.info_request.FromString,
                     response_serializer=devices__pb2.geladeira_info.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'network_interface', rpc_method_handlers)
+            'gateway_interface', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class network_interface(object):
+class gateway_interface(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def interface_scan(request,
+    def use_device(request,
             target,
             options=(),
             channel_credentials=None,
@@ -538,41 +539,7 @@ class network_interface(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/network_interface/interface_scan',
-            devices__pb2.info_request.SerializeToString,
-            devices__pb2.geladeira_info.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def interface_connect(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/network_interface/interface_connect',
-            devices__pb2.info_request.SerializeToString,
-            devices__pb2.geladeira_info.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def interface_disconnect(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/network_interface/interface_disconnect',
+        return grpc.experimental.unary_unary(request, target, '/gateway_interface/use_device',
             devices__pb2.info_request.SerializeToString,
             devices__pb2.geladeira_info.FromString,
             options, channel_credentials,

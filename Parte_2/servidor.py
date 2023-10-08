@@ -10,6 +10,9 @@ import struct
 import time
 import multiprocessing as mp
 
+import subprocess
+import platform
+
 class device_interface(ABC):
 
     @abstractmethod
@@ -42,9 +45,12 @@ class ar_condicionado(device_interface):
         while True :
             try :
                 self.skt_Server.settimeout(timeout)
+
                 client , addr = self.skt_Server.accept()
+
                 mp = mp.Process(target = self.handle_request , args=(client, addr))
                 mp.start()
+
             except error as e:
                 # Tratamento de exceção para liberar a thread em caso de interrupção
                 print("tempo de espera por novas conexões em ar_condicionado encerrado ")
@@ -53,7 +59,6 @@ class ar_condicionado(device_interface):
             
 
     def send_info_2_multicast(self , timer = 10):
-        
         # Criação de um socket UDP
         sock = socket( AF_INET , SOCK_DGRAM , IPPROTO_UDP )
 
@@ -67,7 +72,6 @@ class ar_condicionado(device_interface):
         sock.setsockopt( IPPROTO_IP , IP_ADD_MEMBERSHIP, mreq )
         # sock.setsockopt( IPPROTO_IP , IP_MULTICAST_TTL , 8 )
         
-
         try:
             print("O dispositivo iniciou a tentativa de estabelecer conecção via multicast e permanecerá tentando pelos próximos 1 minuto")
             # message = f"{self.server_Port} , ar_condicionado , {self.name}"
@@ -78,8 +82,7 @@ class ar_condicionado(device_interface):
 
             start_time = time.time()
             while True:
-                # Envia a mensagem para o grupo multicast
-                # sock.sendto(message.encode("utf-8"), (multicast_group, port))
+                
                 sock.sendto(message.SerializeToString() , (multicast_group, port))
                 time.sleep(1)
                 if (time.time() - start_time) > timer :
@@ -98,10 +101,6 @@ class ar_condicionado(device_interface):
         td2 = threading.Thread(target= self.tcp_connect , args=(timer,))
         td2.start()
 
-        # time.sleep(timer)
-        
-        # print("tcp_connect() foi encerrado")
-
 
     def handle_request(self , connection , addr):
         print("[NOVA Conexão em..  ar_condicionado ]")
@@ -110,7 +109,7 @@ class ar_condicionado(device_interface):
             data = connection.recv(1024)
             if data :
 
-                request = ar_condicionado_pb2.info_request()
+                request = devices_pb2.info_request()
                 request.ParseFromString(data)
 
                 # Roteie a mensagem com base nas informações do cabeçalho
@@ -207,29 +206,75 @@ class gateway_server_skt():
             data = connection.recv(1024)
             if data :
 
-                request = ar_condicionado_pb2.info_request()
+                request = devices_pb2.use_request()
                 request.ParseFromString(data)
 
                 # Roteie a mensagem com base nas informações do cabeçalho
                 
                 if  request.service  == "ar_condicionado" and request.method == "ar_condicionado_status":
-                    response = meuservico_pb2.Response()
-                    response.message =  "Chamou ServicoA MetodoA"
+                    data = devices_pb2.info_request()
+                    data.service  = request.service
+                    data.method   = request.method
+                    data.name     = request.name
+                    # data.new_temp = int(request.args)
+
+                    self.devices[request.device_name].send(data.SerializeToString())
+                    data = self.devices[request.device_name].recv(1024)
+
+                    connection.send(data)
+                    
                 elif request.service == "ar_condicionado" and request.method == "ar_condicionado_on"  :
+                    data = devices_pb2.info_request()
+                    data.service  = request.service
+                    data.method   = request.method
+                    data.name     = request.name
+                    # data.new_temp = int(request.args)
 
-                    response = meuservico_pb2.Response()
-                    response.message =  "Chamou ServicoB MetodoB"
+                    self.devices[request.device_name].send(data.SerializeToString())
+                    data = self.devices[request.device_name].recv(1024)
+
+                    connection.send(data)
+
                 elif request.service == "ar_condicionado" and request.method == "ar_condicionado_off" :
-                    response = meuservico_pb2.Response()
-                    response.message =  "Chamou ServicoB MetodoB"
-                elif request.service == "ar_condicionado" and request.method == "ar_condicionado_temp" :
-                    response = meuservico_pb2.Response()
-                    response.message =  "Chamou ServicoB MetodoB"
-                else:
-                    response = meuservico_pb2.Response()
-                    response.message =  "Serviço ou método desconhecido"
+                    data = devices_pb2.info_request()
+                    data.service  = request.service
+                    data.method   = request.method
+                    data.name     = request.name
+                    # data.new_temp = int(request.args)
 
-                print(f"O data recebido foi :\n{data}\n\nO request do data ficou :\n{request.name}")
+                    self.devices[request.device_name].send(data.SerializeToString())
+                    data = self.devices[request.device_name].recv(1024)
+
+                    connection.send(data)
+
+                elif request.service == "ar_condicionado" and request.method == "ar_condicionado_temp" :
+                    data = devices_pb2.info_request()
+                    data.service  = request.service
+                    data.method   = request.method
+                    data.name     = request.name
+                    data.new_temp = int(request.args)
+
+                    self.devices[request.device_name].send(data.SerializeToString())
+                    data = self.devices[request.device_name].recv(1024)
+
+                    connection.send(data)
+                elif request.service == "ar_condicionado" and request.method == "close_connection" :
+                    data = devices_pb2.info_request()
+                    data.service  = request.service
+                    data.method   = request.method
+                    data.name     = request.name
+
+                    self.devices[request.device_name].send(data.SerializeToString())
+                    self.devices[request.device_name].close()
+                    # self.devices[request.device_name] = "Conexão fechada"
+                    # connection.close()
+                elif request.service == "close":
+                    connection.close()
+                    return
+                else:
+                    print("Serviço ou método desconhecido")
+
+                """print(f"O data recebido foi :\n{data}\n\nO request do data ficou :\n{request.name}")
                 response = ar_condicionado_pb2.ar_condicionado_info()
                 response.temperature = 3
                 response.on = True
@@ -237,7 +282,7 @@ class gateway_server_skt():
                 
                 connection.send(response.SerializeToString())
                 connection.close()
-                return
+                return"""
 
     def start_server(self):
         # listen()
@@ -249,6 +294,103 @@ class gateway_server_skt():
             td = threading.Thread(target = self.handle_request , args=(client, addr))
             td.start()
 
+class cls():
+    def __init__(self , server_Name = gethostbyname(gethostname()) , skt_Port = 50151 , max_conections = 5) -> None:
+        self.skt_Server  = socket(AF_INET , SOCK_STREAM)
+        self.skt_Port = skt_Port
+        self.skt_Server.bind((server_Name , self.skt_Port))
+        self.server_Name = server_Name
+        # self.skt_Server.listen(max_conections)
+
+    def prompt(self ,server_Name = gethostbyname(gethostname()) ,  port_to_connect = 50051):
+        # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.skt_Server.connect(( server_Name , port_to_connect ))
+
+        screen_msg = "Tipos de Dispositivos Disponíveis :\n\n1-ar_condicionado\n- \nMétodos Disponíveis :\n"
+        msg2 = "\n1-ar_condicionado_status\n2-ar_condicionado_on\n3-ar_condicionado_off\n4-ar_condicionado_temp\n5-close_connection\n6-close"#
+
+        screen_msg += msg2
+        while True:
+            print(screen_msg)
+            # print("")
+            device_type = ""
+            while True :
+                device_type = input("Digite o número do tipo de dispositivo que você quer interagir : ").strip().lower()
+                if device_type.isnumeric():
+                    device_type = int(device_type)
+                    if (1 <= device_type) and (device_type <=1) :
+                        break
+                    else :
+                        print("Digite um número dentro do range válido")
+                else :
+                    print("Input Inválido")
+            
+            device_name = input("Digite o nome do dispositivo que você quer interagir : ").strip().lower()
+            print("Para usar alguma das funcionalidades do dispositívo digite o respectivo número ao envéz de um comando")
+            comando = input("Digite um comando (cls ou clear para limpar a tela, sair para encerrar): ").strip().lower()
+
+            if comando.isnumeric() :
+                message  = devices_pb2.use_request()
+                message.device_name   = device_name
+                
+                if device_type == 1 :
+                    message.service  = "ar_condicionado"
+                else :
+                    print("Dispositivo inválido")
+
+                if   int(comando) == 1 :
+                    message.device_method = "ar_condicionado_status"
+                    message.method = "ar_condicionado_status"
+                elif int(comando) == 2 :
+                    message.device_method = "ar_condicionado_on"
+                    message.method = "ar_condicionado_on"
+                elif int(comando) == 3 :
+                    message.device_method = "ar_condicionado_off"
+                    message.method = "ar_condicionado_off"
+                elif int(comando) == 4 :
+                    message.device_method = "ar_condicionado_temp"
+                    message.method = "ar_condicionado_temp"
+                    args = ""
+                    while True :
+                        args  = input("Qual a nova temperatura ? : ").strip().lower()
+                        if args.isnumeric():
+                            break
+                        else :
+                            print("Input Inválido")
+                    message.args = args
+
+                elif int(comando) == 5 :
+                    message.device_method = "close_connection"
+                elif int(comando) == 6 :
+                    message.device_method = "close"
+
+                self.skt_Server.send(message.SerializeToString())
+
+            elif comando == "sair":
+                break
+            elif comando == "cls" and platform.system() == "Windows":
+                # Limpar a tela no Windows
+                subprocess.run("cls", shell=True)
+            elif comando == "clear" and platform.system() != "Windows":
+                # Limpar a tela em sistemas Unix-like (Linux, macOS)
+                subprocess.run("clear", shell=True)
+            else:
+                print("Comando não reconhecido.")
+
+
+        """request = devices_pb2.use_request()
+        request.device_name   = "Brastemp-Eletrolux_X86"
+        request.device_method = "ar_condicionado_temp"
+        request.args = "2"
+
+        request.service = "ar_condicionado"  
+        request.method  = "ar_condicionado_temp"
+        
+        client_socket.send(request.SerializeToString())
+
+        data = client_socket.recv(1024)
+        response = ar_condicionado_pb2.ar_condicionado_info()
+        response.ParseFromString(data)"""
 
 def main():
     server_socket = socket(AF_INET, SOCK_STREAM)
