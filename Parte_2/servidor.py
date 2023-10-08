@@ -4,13 +4,11 @@ import devices_pb2
 from concurrent import futures
 from socket import *
 import threading
-# from overloading import override , overload
-# from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from constants import *
 import struct
 import time
-# import random as rd
+import multiprocessing as mp
 
 class device_interface(ABC):
 
@@ -35,10 +33,27 @@ class ar_condicionado(device_interface):
         self.skt_Server.bind(( server_Name , server_Port ))
         self.skt_Server.listen(5)
         
+        
         print("Server Ligado ", server_Name )
     
-    def open_multicast_connection(self):
+    def tcp_connect(self , timeout = 6):
+        client , addr = None , None
+        print("ar_condicionado aberto a novas conexões TCP")
+        while True :
+            try :
+                self.skt_Server.settimeout(timeout)
+                client , addr = self.skt_Server.accept()
+                mp = mp.Process(target = self.handle_request , args=(client, addr))
+                mp.start()
+            except error as e:
+                # Tratamento de exceção para liberar a thread em caso de interrupção
+                print("tempo de espera por novas conexões em ar_condicionado encerrado ")
+                
+                return
+            
 
+    def send_info_2_multicast(self , timer = 10):
+        
         # Criação de um socket UDP
         sock = socket( AF_INET , SOCK_DGRAM , IPPROTO_UDP )
 
@@ -67,28 +82,81 @@ class ar_condicionado(device_interface):
                 # sock.sendto(message.encode("utf-8"), (multicast_group, port))
                 sock.sendto(message.SerializeToString() , (multicast_group, port))
                 time.sleep(1)
-                if (time.time() - start_time) > 10 :
+                if (time.time() - start_time) > timer :
                     break
             print("Servidor multicast encerrado.")
         except KeyboardInterrupt:
             print("Servidor multicast encerrado.")
         finally:
             sock.close()
+    def conect_in_localhost_devices(self , timer = 4):
+        
+        self.exit_thread = False
+        td1 = threading.Thread(target= self.send_info_2_multicast , args=(timer,))
+        td1.start()
+
+        td2 = threading.Thread(target= self.tcp_connect , args=(timer,))
+        td2.start()
+
+        # time.sleep(timer)
+        
+        # print("tcp_connect() foi encerrado")
 
 
     def handle_request(self , connection , addr):
-        pass
+        print("[NOVA Conexão em..  ar_condicionado ]")
+
+        while True :
+            data = connection.recv(1024)
+            if data :
+
+                request = ar_condicionado_pb2.info_request()
+                request.ParseFromString(data)
+
+                # Roteie a mensagem com base nas informações do cabeçalho
+                
+                if  request.service  == "ar_condicionado" and request.method == "ar_condicionado_status":
+                    response = devices_pb2.ar_condicionado_info()
+                    response.on =  self.on
+                    response.temperature =  self.temperature
+
+                elif request.service == "ar_condicionado" and request.method == "ar_condicionado_on"  :
+                    self.on = True
+                    response = devices_pb2.ar_condicionado_info()
+                    response.on =  self.on
+                    response.temperature =  self.temperature
+                elif request.service == "ar_condicionado" and request.method == "ar_condicionado_off" :
+                    self.on = False
+                    response = devices_pb2.ar_condicionado_info()
+                    response.on =  self.on
+                    response.temperature =  self.temperature
+                elif request.service == "ar_condicionado" and request.method == "ar_condicionado_temp" :
+                    self.temperature = request.new_temp
+                    response = devices_pb2.ar_condicionado_info()
+                    response.on =  self.on
+                    response.temperature =  self.temperature
+                elif request.service == "ar_condicionado" and request.method == "close_connection" :
+                    connection.close()
+                    return
+                else:
+                    print("Serviço ou método desconhecido")
+
+                # f"Hello, {request.name}!The ar condicionado {request.name} is on now ."
+                
+                connection.send(response.SerializeToString())
+                # connection.close()
+                # return
 
     def __str__(self) -> str:
         return f"ar_condicionado() : {self.name} , temperature : {self.temperature} , on : {self.on}"
     
 
 class gateway_server_skt():
-    def __init__(self , server_Name = gethostbyname(gethostname()) , server_Port = 50051) -> None:
+    def __init__(self , server_Name = gethostbyname(gethostname()) , server_Port = 50051 , max_conections = 5) -> None:
         # server_Name = '/path/to/my/socket'
         self.skt_Server  = socket(AF_INET , SOCK_STREAM)
         self.skt_Server.bind((server_Name , server_Port))
-        self.skt_Server.listen(5)
+        self.skt_Server.listen(max_conections)
         self.devices = {}
 
         print("Server Ligado ", server_Name )
@@ -113,16 +181,24 @@ class gateway_server_skt():
         # sock.listen(2)
         start_time = time.time()
         while True:
+
             print("Iniciando a busca em multicast")
+
             raw_data, address = sock.recvfrom(1024)
             # print(sock.recvfrom(1024))
+
             data = devices_pb2.device_discover()
             data.ParseFromString(raw_data)
-            # data = data.decode('utf-8').strip().split(",")
+            
             print(f"Recebido: \n{data} de {address}")
+            self.devices[data.name] = data
+
             if (time.time() - start_time) > 6 :
                     print("Busca por devices encerrada")
                     break
+        
+        self.devices = { i.name:client_socket.connect((address[0], i.port )) for i in self.devices }
+        print(self.devices)
     
     def handle_request(self , connection , addr):
         print("[NOVA Conexão..]")
