@@ -13,31 +13,33 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rdevices.proto\"\x1c\n\x0cinfo_request\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1f\n\x0flampada_request\x12\x0c\n\x04name\x18\x01 \x01(\t\"-\n\x0b\x63hange_temp\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08new_temp\x18\x02 \x01(\x05\"\x1a\n\x0clampada_info\x12\n\n\x02on\x18\x01 \x01(\x08\"7\n\x14\x61r_condicionado_info\x12\n\n\x02on\x18\x01 \x01(\x08\x12\x13\n\x0btemperature\x18\x02 \x01(\x05\"1\n\x0egeladeira_info\x12\n\n\x02on\x18\x01 \x01(\x08\x12\x13\n\x0btemperature\x18\x02 \x01(\x05\x32\x8f\x02\n\x0f\x61r_condicionado\x12<\n\x12\x61r_condicionado_on\x12\r.info_request\x1a\x15.ar_condicionado_info\"\x00\x12=\n\x13\x61r_condicionado_off\x12\r.info_request\x1a\x15.ar_condicionado_info\"\x00\x12@\n\x16\x61r_condicionado_status\x12\r.info_request\x1a\x15.ar_condicionado_info\"\x00\x12=\n\x14\x61r_condicionado_temp\x12\x0c.change_temp\x1a\x15.ar_condicionado_info\"\x00\x32\x9b\x01\n\x07lampada\x12,\n\nlampada_on\x12\r.info_request\x1a\r.lampada_info\"\x00\x12-\n\x0blampada_off\x12\r.info_request\x1a\r.lampada_info\"\x00\x12\x33\n\x0elampada_status\x12\x10.lampada_request\x1a\r.lampada_info\"\x00\x32\xf1\x01\n\tgeladeira\x12\x36\n\x12\x61r_condicionado_on\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x37\n\x13\x61r_condicionado_off\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12:\n\x16\x61r_condicionado_status\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x37\n\x14\x61r_condicionado_temp\x12\x0c.change_temp\x1a\x0f.geladeira_info\"\x00\x32\xb8\x01\n\x11network_interface\x12\x32\n\x0einterface_scan\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x35\n\x11interface_connect\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x38\n\x14interface_disconnect\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rdevices.proto\"B\n\x0f\x64\x65vice_discover\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_type\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"\x1c\n\x0cinfo_request\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1f\n\x0flampada_request\x12\x0c\n\x04name\x18\x01 \x01(\t\"-\n\x0b\x63hange_temp\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08new_temp\x18\x02 \x01(\x05\"\x1a\n\x0clampada_info\x12\n\n\x02on\x18\x01 \x01(\x08\"7\n\x14\x61r_condicionado_info\x12\n\n\x02on\x18\x01 \x01(\x08\x12\x13\n\x0btemperature\x18\x02 \x01(\x05\"1\n\x0egeladeira_info\x12\n\n\x02on\x18\x01 \x01(\x08\x12\x13\n\x0btemperature\x18\x02 \x01(\x05\x32\x8f\x02\n\x0f\x61r_condicionado\x12<\n\x12\x61r_condicionado_on\x12\r.info_request\x1a\x15.ar_condicionado_info\"\x00\x12=\n\x13\x61r_condicionado_off\x12\r.info_request\x1a\x15.ar_condicionado_info\"\x00\x12@\n\x16\x61r_condicionado_status\x12\r.info_request\x1a\x15.ar_condicionado_info\"\x00\x12=\n\x14\x61r_condicionado_temp\x12\x0c.change_temp\x1a\x15.ar_condicionado_info\"\x00\x32\x9b\x01\n\x07lampada\x12,\n\nlampada_on\x12\r.info_request\x1a\r.lampada_info\"\x00\x12-\n\x0blampada_off\x12\r.info_request\x1a\r.lampada_info\"\x00\x12\x33\n\x0elampada_status\x12\x10.lampada_request\x1a\r.lampada_info\"\x00\x32\xf1\x01\n\tgeladeira\x12\x36\n\x12\x61r_condicionado_on\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x37\n\x13\x61r_condicionado_off\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12:\n\x16\x61r_condicionado_status\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x37\n\x14\x61r_condicionado_temp\x12\x0c.change_temp\x1a\x0f.geladeira_info\"\x00\x32\xb8\x01\n\x11network_interface\x12\x32\n\x0einterface_scan\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x35\n\x11interface_connect\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x12\x38\n\x14interface_disconnect\x12\r.info_request\x1a\x0f.geladeira_info\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'devices_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_INFO_REQUEST']._serialized_start=17
-  _globals['_INFO_REQUEST']._serialized_end=45
-  _globals['_LAMPADA_REQUEST']._serialized_start=47
-  _globals['_LAMPADA_REQUEST']._serialized_end=78
-  _globals['_CHANGE_TEMP']._serialized_start=80
-  _globals['_CHANGE_TEMP']._serialized_end=125
-  _globals['_LAMPADA_INFO']._serialized_start=127
-  _globals['_LAMPADA_INFO']._serialized_end=153
-  _globals['_AR_CONDICIONADO_INFO']._serialized_start=155
-  _globals['_AR_CONDICIONADO_INFO']._serialized_end=210
-  _globals['_GELADEIRA_INFO']._serialized_start=212
-  _globals['_GELADEIRA_INFO']._serialized_end=261
-  _globals['_AR_CONDICIONADO']._serialized_start=264
-  _globals['_AR_CONDICIONADO']._serialized_end=535
-  _globals['_LAMPADA']._serialized_start=538
-  _globals['_LAMPADA']._serialized_end=693
-  _globals['_GELADEIRA']._serialized_start=696
-  _globals['_GELADEIRA']._serialized_end=937
-  _globals['_NETWORK_INTERFACE']._serialized_start=940
-  _globals['_NETWORK_INTERFACE']._serialized_end=1124
+  _globals['_DEVICE_DISCOVER']._serialized_start=17
+  _globals['_DEVICE_DISCOVER']._serialized_end=83
+  _globals['_INFO_REQUEST']._serialized_start=85
+  _globals['_INFO_REQUEST']._serialized_end=113
+  _globals['_LAMPADA_REQUEST']._serialized_start=115
+  _globals['_LAMPADA_REQUEST']._serialized_end=146
+  _globals['_CHANGE_TEMP']._serialized_start=148
+  _globals['_CHANGE_TEMP']._serialized_end=193
+  _globals['_LAMPADA_INFO']._serialized_start=195
+  _globals['_LAMPADA_INFO']._serialized_end=221
+  _globals['_AR_CONDICIONADO_INFO']._serialized_start=223
+  _globals['_AR_CONDICIONADO_INFO']._serialized_end=278
+  _globals['_GELADEIRA_INFO']._serialized_start=280
+  _globals['_GELADEIRA_INFO']._serialized_end=329
+  _globals['_AR_CONDICIONADO']._serialized_start=332
+  _globals['_AR_CONDICIONADO']._serialized_end=603
+  _globals['_LAMPADA']._serialized_start=606
+  _globals['_LAMPADA']._serialized_end=761
+  _globals['_GELADEIRA']._serialized_start=764
+  _globals['_GELADEIRA']._serialized_end=1005
+  _globals['_NETWORK_INTERFACE']._serialized_start=1008
+  _globals['_NETWORK_INTERFACE']._serialized_end=1192
 # @@protoc_insertion_point(module_scope)

@@ -22,9 +22,13 @@ service network_interface{
     rpc interface_scan(    info_request) returns (geladeira_info) {}
     rpc interface_connect(    info_request) returns (geladeira_info) {}
     rpc interface_disconnect(   info_request) returns (geladeira_info) {}
-
 }
 
+message device_discover{
+    string name = 1 ;
+    string device_type = 2 ;
+    int32 port = 3 ;
+}
 message info_request{
     string name = 1;
 }
