@@ -16,10 +16,10 @@ class cls():
         # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.skt_Server.connect(( server_Name , port_to_connect ))
 
-        screen_msg = "Tipos de Dispositivos Disponíveis :\n\n1-ar_condicionado\n- \nMétodos Disponíveis :\n"
-        msg2 = "\n1-ar_condicionado_status\n2-ar_condicionado_on\n3-ar_condicionado_off\n4-ar_condicionado_temp\n5-close_connection\n6-close"#
-
-        screen_msg += msg2
+        screen_msg = "Tipos de Dispositivos Disponíveis :\n\n1-ar_condicionado\n2-lampada\n \n"
+        
+        msg3 = "\n5-close_connection\n6-close\n7-gateway_find_devices"
+        # screen_msg += msg2 + msg3
         while True:
             print(screen_msg)
             # print("")
@@ -28,14 +28,24 @@ class cls():
                 device_type = input("Digite o número do tipo de dispositivo que você quer interagir : ").strip().lower()
                 if device_type.isnumeric():
                     device_type = int(device_type)
-                    if (1 <= device_type) and (device_type <=1) :
+                    if (1 <= device_type) and (device_type <=2) :
                         break
                     else :
                         print("Digite um número dentro do range válido")
                 else :
                     print("Input Inválido")
             
-            device_name = input("Digite o nome do dispositivo que você quer interagir : ").strip().lower()
+            dev = ""
+            msg_aux = ""
+            if device_type == 1 :
+                dev  = "ar_condicionado"
+                msg_aux = f"\n4-{dev}_temp"
+            elif device_type == 2 :
+                dev  = "lampada"
+
+            msg2 = f"\nMétodos Disponíveis :\n\n1-{dev}_status\n2-{dev}_on\n3-{dev}_off"#
+            device_name = input("Digite o nome do dispositivo que você quer interagir : ").strip()
+            print(msg2 +msg_aux + msg3)
             print("Para usar alguma das funcionalidades do dispositívo digite o respectivo número ao envéz de um comando")
             comando = input("Digite um comando (cls ou clear para limpar a tela, sair para encerrar): ").strip().lower()
 
@@ -45,21 +55,24 @@ class cls():
                 
                 if device_type == 1 :
                     message.service  = "ar_condicionado"
+                elif device_type == 2 :
+                    message.service  = "lampada"
+                
                 else :
                     print("Dispositivo inválido")
 
                 if   int(comando) == 1 :
-                    message.device_method = "ar_condicionado_status"
-                    message.method = "ar_condicionado_status"
+                    # message.device_method = "ar_condicionado_status"
+                    message.method = f"{message.service}_status"
                 elif int(comando) == 2 :
-                    message.device_method = "ar_condicionado_on"
-                    message.method = "ar_condicionado_on"
+                    # message.device_method = "ar_condicionado_on"
+                    message.method = f"{message.service}_on"
                 elif int(comando) == 3 :
-                    message.device_method = "ar_condicionado_off"
-                    message.method = "ar_condicionado_off"
+                    # message.device_method = "ar_condicionado_off"
+                    message.method = f"{message.service}_off"
                 elif int(comando) == 4 :
-                    message.device_method = "ar_condicionado_temp"
-                    message.method = "ar_condicionado_temp"
+                    # message.device_method = "ar_condicionado_temp"
+                    message.method = f"{message.service}_temp"
                     args = ""
                     while True :
                         args  = input("Qual a nova temperatura ? : ").strip().lower()
@@ -70,12 +83,24 @@ class cls():
                     message.args = args
 
                 elif int(comando) == 5 :
-                    message.device_method = "close_connection"
+                    message.method = "close_connection"
                 elif int(comando) == 6 :
-                    message.device_method = "close"
+                    message.method = "close"
 
                 self.skt_Server.send(message.SerializeToString())
 
+                response = self.skt_Server.recv(1024)
+                response_handler = None
+
+                if device_type == 1 : #"ar_condicionado"
+                    response_handler = devices_pb2.ar_condicionado_info()
+                elif device_type == 2 : # "lampada"
+                    response_handler = devices_pb2.lampada_info()
+
+                
+                response_handler.ParseFromString(response)
+
+                print(f"A resposta foi :\n\n {response_handler}")
             elif comando == "sair":
                 break
             elif comando == "cls" and platform.system() == "Windows":
@@ -102,5 +127,5 @@ class cls():
         response = ar_condicionado_pb2.ar_condicionado_info()
         response.ParseFromString(data)"""
 
-# cmd = cls()
-# cmd.prompt(port_to_connect = 50051)
+cmd = cls()
+cmd.prompt(port_to_connect = 50051)

@@ -219,7 +219,7 @@ class lampadaStub(object):
                 )
         self.lampada_status = channel.unary_unary(
                 '/lampada/lampada_status',
-                request_serializer=devices__pb2.lampada_request.SerializeToString,
+                request_serializer=devices__pb2.info_request.SerializeToString,
                 response_deserializer=devices__pb2.lampada_info.FromString,
                 )
 
@@ -260,7 +260,7 @@ def add_lampadaServicer_to_server(servicer, server):
             ),
             'lampada_status': grpc.unary_unary_rpc_method_handler(
                     servicer.lampada_status,
-                    request_deserializer=devices__pb2.lampada_request.FromString,
+                    request_deserializer=devices__pb2.info_request.FromString,
                     response_serializer=devices__pb2.lampada_info.SerializeToString,
             ),
     }
@@ -319,7 +319,7 @@ class lampada(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/lampada/lampada_status',
-            devices__pb2.lampada_request.SerializeToString,
+            devices__pb2.info_request.SerializeToString,
             devices__pb2.lampada_info.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -8,20 +8,22 @@ from abc import ABC, abstractmethod
 from constants import *
 import struct
 import time
+from devices import *
 # import multiprocessing as mp
 
 import subprocess
 import platform
-
+"""
 class device_interface(ABC):
 
     @abstractmethod
     def handle_request(self , connection , addr):
         pass
 
+"""
 """OS DISPOSITIVOS SERÃO TODOS SERVIDORES , ENQUANTO O GATEWAY É TANTO CLIENTE DOS DISPOSITIVOS , QUANTO SERVIDOR
 DE QUEM QUEIRA SE CONECTAR AO SISTEMA SERVINDO COMO A INTERFACE COM O MUNDO EXTERNO"""
-
+"""
 class ar_condicionado(device_interface):
 
     def __init__(self , name : str ="Brastemp_Eletrolux" , on: bool = False, temperature : int = 20  ,
@@ -149,7 +151,7 @@ class ar_condicionado(device_interface):
     def __str__(self) -> str:
         return f"ar_condicionado() : {self.name} , temperature : {self.temperature} , on : {self.on}"
     
-
+"""
 class gateway_server_skt():
     def __init__(self , server_Name = gethostbyname(gethostname()) , server_Port = 50051 , max_conections = 5) -> None:
         # server_Name = '/path/to/my/socket'
@@ -160,7 +162,7 @@ class gateway_server_skt():
 
         print("Server Ligado ", server_Name )
     
-    def find_devices(self) :
+    def find_devices(self , timer = 3) :
         # Criação de um socket UDP
         sock = socket(AF_INET, SOCK_DGRAM , IPPROTO_UDP)
 
@@ -192,7 +194,7 @@ class gateway_server_skt():
             print(f"Recebido: \n{data} \nde {address}")
             self.devices[data.name] = data
 
-            if (time.time() - start_time) > 3 :
+            if (time.time() - start_time) > timer :
                     print("Busca por devices encerrada")
                     break
             
@@ -203,7 +205,72 @@ class gateway_server_skt():
 
         # self.devices = { i.name: socket(AF_INET , SOCK_STREAM).connect((address[0], i.port )) for i in self.devices.values() }
         print(self.devices)
-    
+    def __handle_method_type(self , data , request , type , connection ):
+
+        if request.method == f"{type}_status":
+            data = devices_pb2.info_request()
+            data.service  = request.service
+            data.method   = request.method
+            data.name     = request.device_name
+            # data.new_temp = int(request.args)
+
+            self.devices[request.device_name].send(data.SerializeToString())
+            data = self.devices[request.device_name].recv(1024)
+
+            connection.send(data)
+            
+        elif request.method == f"{type}_on"  :
+            data = devices_pb2.info_request()
+            data.service  = request.service
+            data.method   = request.method
+            data.name     = request.device_name
+            # data.new_temp = int(request.args)
+
+            self.devices[request.device_name].send(data.SerializeToString())
+            data = self.devices[request.device_name].recv(1024)
+
+            connection.send(data)
+
+        elif request.method == f"{type}_off" :
+            data = devices_pb2.info_request()
+            data.service  = request.service
+            data.method   = request.method
+            data.name     = request.device_name
+            # data.new_temp = int(request.args)
+
+            self.devices[request.device_name].send(data.SerializeToString())
+            data = self.devices[request.device_name].recv(1024)
+
+            connection.send(data)
+
+        elif request.method == f"{type}_temp" :
+            data = devices_pb2.info_request()
+            data.service  = request.service
+            data.method   = request.method
+            data.name     = request.device_name
+            data.new_temp = int(request.args)
+
+            self.devices[request.device_name].send(data.SerializeToString())
+            data = self.devices[request.device_name].recv(1024)
+
+            connection.send(data)
+        elif  request.method == "close_connection" :
+            data = devices_pb2.info_request()
+            data.service  = request.service
+            data.method   = request.method
+            data.name     = request.device_name
+
+            self.devices[request.device_name].send(data.SerializeToString())
+            self.devices[request.device_name].close()
+            # self.devices[request.device_name] = "Conexão fechada"
+            # connection.close()
+        elif request.service == "close":
+
+            connection.close()
+            return
+        else:
+            print("Serviço ou método desconhecido")
+
     def handle_request(self , connection , addr):
         print("[GATEWAY : NOVA Conexão..]")
 
@@ -215,12 +282,20 @@ class gateway_server_skt():
                 request.ParseFromString(data)
 
                 # Roteie a mensagem com base nas informações do cabeçalho
+                print(request)
+
+                if request.service  == "ar_condicionado" :
+                    self.__handle_method_type(data , request , request.service , connection)
+                elif request.service  == "lampada" :
+                    self.__handle_method_type(data , request , request.service , connection)
                 
+                """
                 if  request.service  == "ar_condicionado" and request.method == "ar_condicionado_status":
+                    
                     data = devices_pb2.info_request()
                     data.service  = request.service
                     data.method   = request.method
-                    data.name     = request.name
+                    data.name     = request.device_name
                     # data.new_temp = int(request.args)
 
                     self.devices[request.device_name].send(data.SerializeToString())
@@ -232,7 +307,7 @@ class gateway_server_skt():
                     data = devices_pb2.info_request()
                     data.service  = request.service
                     data.method   = request.method
-                    data.name     = request.name
+                    data.name     = request.device_name
                     # data.new_temp = int(request.args)
 
                     self.devices[request.device_name].send(data.SerializeToString())
@@ -244,7 +319,7 @@ class gateway_server_skt():
                     data = devices_pb2.info_request()
                     data.service  = request.service
                     data.method   = request.method
-                    data.name     = request.name
+                    data.name     = request.device_name
                     # data.new_temp = int(request.args)
 
                     self.devices[request.device_name].send(data.SerializeToString())
@@ -256,7 +331,7 @@ class gateway_server_skt():
                     data = devices_pb2.info_request()
                     data.service  = request.service
                     data.method   = request.method
-                    data.name     = request.name
+                    data.name     = request.device_name
                     data.new_temp = int(request.args)
 
                     self.devices[request.device_name].send(data.SerializeToString())
@@ -267,17 +342,20 @@ class gateway_server_skt():
                     data = devices_pb2.info_request()
                     data.service  = request.service
                     data.method   = request.method
-                    data.name     = request.name
+                    data.name     = request.device_name
 
                     self.devices[request.device_name].send(data.SerializeToString())
                     self.devices[request.device_name].close()
                     # self.devices[request.device_name] = "Conexão fechada"
                     # connection.close()
                 elif request.service == "close":
+
                     connection.close()
                     return
                 else:
                     print("Serviço ou método desconhecido")
+                """
+
 
                 """print(f"O data recebido foi :\n{data}\n\nO request do data ficou :\n{request.name}")
                 response = ar_condicionado_pb2.ar_condicionado_info()
