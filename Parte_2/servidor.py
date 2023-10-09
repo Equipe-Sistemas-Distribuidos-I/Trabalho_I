@@ -288,6 +288,8 @@ class gateway_server_skt():
                     self.__handle_method_type(data , request , request.service , connection)
                 elif request.service  == "lampada" :
                     self.__handle_method_type(data , request , request.service , connection)
+                elif request.service  == "geladeira" :
+                    self.__handle_method_type(data , request , request.service , connection)
                 
                 """
                 if  request.service  == "ar_condicionado" and request.method == "ar_condicionado_status":

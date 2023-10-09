@@ -16,7 +16,7 @@ class cls():
         # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.skt_Server.connect(( server_Name , port_to_connect ))
 
-        screen_msg = "Tipos de Dispositivos Disponíveis :\n\n1-ar_condicionado\n2-lampada\n \n"
+        screen_msg = "Tipos de Dispositivos Disponíveis :\n\n1-ar_condicionado\n2-lampada\n3-geladeira\n \n"
         
         msg3 = "\n5-close_connection\n6-close\n7-gateway_find_devices"
         # screen_msg += msg2 + msg3
@@ -28,7 +28,7 @@ class cls():
                 device_type = input("Digite o número do tipo de dispositivo que você quer interagir : ").strip().lower()
                 if device_type.isnumeric():
                     device_type = int(device_type)
-                    if (1 <= device_type) and (device_type <=2) :
+                    if (1 <= device_type) and (device_type <=3) :
                         break
                     else :
                         print("Digite um número dentro do range válido")
@@ -42,6 +42,9 @@ class cls():
                 msg_aux = f"\n4-{dev}_temp"
             elif device_type == 2 :
                 dev  = "lampada"
+            elif device_type == 3 :
+                dev  = "geladeira"
+                msg_aux = f"\n4-{dev}_temp"
 
             msg2 = f"\nMétodos Disponíveis :\n\n1-{dev}_status\n2-{dev}_on\n3-{dev}_off"#
             device_name = input("Digite o nome do dispositivo que você quer interagir : ").strip()
@@ -57,6 +60,8 @@ class cls():
                     message.service  = "ar_condicionado"
                 elif device_type == 2 :
                     message.service  = "lampada"
+                elif device_type == 3 :
+                    message.service  = "geladeira"
                 
                 else :
                     print("Dispositivo inválido")
@@ -96,6 +101,8 @@ class cls():
                     response_handler = devices_pb2.ar_condicionado_info()
                 elif device_type == 2 : # "lampada"
                     response_handler = devices_pb2.lampada_info()
+                elif device_type == 3 : #"geladeira"
+                    response_handler = devices_pb2.ar_condicionado_info()
 
                 
                 response_handler.ParseFromString(response)
