@@ -1,4 +1,4 @@
-# Chat TCP em Python
+# Smart home simulada utilizando Sockets
 
 Este é uma sistema que simula um ambiente de smart home, com alguns dispositivos, ele utiliza socket TCP e UDP para fazer as comunicações entre dispositivos e utiliza protocol buffers para serializar as mensagens, além disso existe um gateway com serviço de descoberta de equipamentos.
 
